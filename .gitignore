@@ -1,0 +1,11 @@
+# Project structure
+data
+out
+runs
+
+# Python
+venv
+__pycache__
+
+# Editor
+.vscode
