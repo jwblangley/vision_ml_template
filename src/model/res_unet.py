@@ -3,8 +3,10 @@ import torch.nn as nn
 
 from model.components.residual import ResidualBlock, ResidualBlockResize
 
-def _lerp(a, b , t):
+
+def _lerp(a, b, t):
     return a + t * (b - a)
+
 
 def _down_block(in_channels, out_channels, factor):
     middle_channels = (in_channels + out_channels) // 2
@@ -15,6 +17,7 @@ def _down_block(in_channels, out_channels, factor):
         ResidualBlock(middle_channels, out_channels),
     )
 
+
 def _up_block(in_channels, out_channels, factor):
     middle_channels = (in_channels + out_channels) // 2
 
@@ -24,10 +27,12 @@ def _up_block(in_channels, out_channels, factor):
         ResidualBlock(middle_channels, out_channels),
     )
 
+
 class ResUNet(nn.Module):
     """
     Implementation of a Residual UNet
     """
+
     def __init__(self, in_channels, out_channels, max_channels=256, layers=5, factor=2):
         super().__init__()
 
@@ -37,16 +42,26 @@ class ResUNet(nn.Module):
         self.layers = layers
         self.factor = factor
 
-        channel_t_pairs = list(zip(range(self.layers + 1), [*range(1, self.layers + 1), None]))[:-1]
+        channel_t_pairs = list(
+            zip(range(self.layers + 1), [*range(1, self.layers + 1), None])
+        )[:-1]
 
         self.encoder_blocks = [
-            _down_block(int(_lerp(self.in_channels, self.max_channels, t1 / self.layers)), int(_lerp(self.in_channels, self.max_channels, t2 / self.layers)), self.factor)
+            _down_block(
+                int(_lerp(self.in_channels, self.max_channels, t1 / self.layers)),
+                int(_lerp(self.in_channels, self.max_channels, t2 / self.layers)),
+                self.factor,
+            )
             for t1, t2 in channel_t_pairs
         ]
 
         # 2x so that skip connections can be added
         self.decoder_blocks = [
-            _up_block(2 * int(_lerp(self.in_channels, self.max_channels, t1 / self.layers)), int(_lerp(self.in_channels, self.max_channels, t2 / self.layers)), self.factor)
+            _up_block(
+                2 * int(_lerp(self.in_channels, self.max_channels, t1 / self.layers)),
+                int(_lerp(self.in_channels, self.max_channels, t2 / self.layers)),
+                self.factor,
+            )
             for t2, t1 in reversed(channel_t_pairs)
         ]
 
@@ -55,6 +70,7 @@ class ResUNet(nn.Module):
     """
     Required for these blocks to appear as parameters of this model
     """
+
     def _embed_layers(self):
         for i, enc_block in enumerate(self.encoder_blocks):
             setattr(self, f"enc_block_{i}", enc_block)

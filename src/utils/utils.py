@@ -9,6 +9,7 @@ import matplotlib
 
 OUT_DIR = "./out"
 
+
 def new_id():
     chosen_id = None
     while chosen_id is None or os.path.isdir(f"out/{chosen_id}"):
@@ -28,6 +29,7 @@ def latest_checkpoint(run_id):
     if max_valid <= 0:
         raise RuntimeError(f"No valid checkpoints saved for ID: {run_id}")
     return torch.load(f"{directory}/{max_valid}-checkpoint.tar")
+
 
 def tensorboard_write(writer, epoch, key, value, prefix=""):
     if isinstance(value, matplotlib.figure.Figure):

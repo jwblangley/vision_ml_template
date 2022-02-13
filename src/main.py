@@ -72,7 +72,9 @@ parser.add_argument(
     help="Path to JSON file containing conditional loss definitions",
 )
 
-parser.add_argument("dataset", type=str, help="Name of dataset folder within `data` directory")
+parser.add_argument(
+    "dataset", type=str, help="Name of dataset folder within `data` directory"
+)
 
 args = parser.parse_args()
 
@@ -111,7 +113,6 @@ DATASET = args.dataset
 COND_LOSSES_PATH = args.conditions
 
 
-
 # Main method
 if __name__ == "__main__":
     starting_epoch = 1
@@ -122,11 +123,9 @@ if __name__ == "__main__":
         starting_epoch = checkpoint["epoch"] + 1
 
     # Create data loaders
-    (
-        training_loader,
-        validation_loader,
-        test_loader
-    ) = load_image_folder(DATASET, BATCH_SIZE, truncate_number=200, num_workers=16)
+    (training_loader, validation_loader, test_loader) = load_image_folder(
+        DATASET, BATCH_SIZE, truncate_number=200, num_workers=16
+    )
 
     model = ResUNet(3, 3).to(DEVICE)
 
@@ -158,7 +157,7 @@ if __name__ == "__main__":
         torch.set_rng_state(checkpoint["rng_state"])
         torch.cuda.set_rng_state_all(checkpoint["cuda_rng_state"])
 
-    for epoch in range(starting_epoch, EPOCHS+1):
+    for epoch in range(starting_epoch, EPOCHS + 1):
         print(f"Epoch {epoch} of {EPOCHS}")
 
         train_report = run_epoch(
@@ -167,11 +166,13 @@ if __name__ == "__main__":
             training_loader,
             optimizer,
             DEVICE,
-            lagrangian_multipliers=lagrangian_multipliers
+            lagrangian_multipliers=lagrangian_multipliers,
         )
         if LOGGING:
             for key in train_report.keys():
-                utils.tensorboard_write(writer, epoch, key, train_report[key], prefix="Train")
+                utils.tensorboard_write(
+                    writer, epoch, key, train_report[key], prefix="Train"
+                )
 
         validation_report = run_epoch(
             False,
@@ -179,12 +180,13 @@ if __name__ == "__main__":
             validation_loader,
             optimizer,
             DEVICE,
-            lagrangian_multipliers=lagrangian_multipliers
+            lagrangian_multipliers=lagrangian_multipliers,
         )
         if LOGGING:
             for key in validation_report.keys():
-                utils.tensorboard_write(writer, epoch, key, validation_report[key], prefix="Validation")
-
+                utils.tensorboard_write(
+                    writer, epoch, key, validation_report[key], prefix="Validation"
+                )
 
         # Save checkpoint if necessary
         if CHECKPOINTS is not None and epoch % CHECKPOINTS == 0:
@@ -198,7 +200,7 @@ if __name__ == "__main__":
             if lagrangian_multipliers is not None:
                 checkpoint = {
                     **checkpoint,
-                    **{"lagrangian_multipliers": lagrangian_multipliers.state_dict()}
+                    **{"lagrangian_multipliers": lagrangian_multipliers.state_dict()},
                 }
             torch.save(checkpoint, f"{utils.OUT_DIR}/{ID}/{epoch}-checkpoint.tar")
 

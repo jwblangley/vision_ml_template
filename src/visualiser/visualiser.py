@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 
 matplotlib.use("Agg")
 
+
 @torch.no_grad()
 def create_summary_figure(
     original_data,
@@ -41,7 +42,9 @@ def create_summary_figure(
         )
 
     if not (input_data.shape == target_data.shape == output_data.shape):
-        raise ValueError(f"Mismatched data shapes. Input, Target, Output: {input_data.shape}, {target_data.shape}, {output_data.shape}")
+        raise ValueError(
+            f"Mismatched data shapes. Input, Target, Output: {input_data.shape}, {target_data.shape}, {output_data.shape}"
+        )
 
     # Define figure parameters
     plt.clf()
@@ -124,6 +127,7 @@ def create_summary_figure(
     plt.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
     plt.imshow(residual_plt)
 
-
-    assert plt_counter == total_plots, f"Incorrect final plot counter. Got {plt_counter}. Expected {total_plots}"
+    assert (
+        plt_counter == total_plots
+    ), f"Incorrect final plot counter. Got {plt_counter}. Expected {total_plots}"
     return plt.gcf()

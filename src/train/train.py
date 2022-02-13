@@ -10,14 +10,7 @@ from visualiser.visualiser import create_summary_figure
 MAX_NUM_SHOW = 10
 
 
-def _epoch_core(
-    train,
-    model,
-    loader,
-    optimizer,
-    device,
-    lagrangian_multipliers=None
-):
+def _epoch_core(train, model, loader, optimizer, device, lagrangian_multipliers=None):
     """
     Run one epoch
 
@@ -47,7 +40,6 @@ def _epoch_core(
         input_data = original_data
         target_data = data[0].to(torch.get_default_dtype()).to(device)
 
-
         if train:
             model.train()
 
@@ -67,9 +59,7 @@ def _epoch_core(
 
         # Define conditional losses for lagrangian multipliers
         avg_brightness = output_data.mean()
-        cond_losses = {
-            "average_brightness": avg_brightness
-        }
+        cond_losses = {"average_brightness": avg_brightness}
 
         if lagrangian_multipliers is not None:
             loss = mdmm_lagrangian(primary_loss, lagrangian_multipliers, cond_losses)
@@ -98,14 +88,28 @@ def _epoch_core(
     if lagrangian_multipliers is not None:
         report["Primary Loss"] = primary_loss_total / len(loader)
 
-        report_multipliers  = {f"Lagrangian Multiplier: {name}":value.item() for name, (value, slack) in lagrangian_multipliers.lagrangian_multipliers.items()}
+        report_multipliers = {
+            f"Lagrangian Multiplier: {name}": value.item()
+            for name, (
+                value,
+                slack,
+            ) in lagrangian_multipliers.lagrangian_multipliers.items()
+        }
 
         report = {**report, **report_multipliers}
 
-    report_conditional_losses = {f"Conditional loss: {name}": value for name, value in cond_losses.items()}
+    report_conditional_losses = {
+        f"Conditional loss: {name}": value for name, value in cond_losses.items()
+    }
     report = {**report, **report_conditional_losses}
 
-    report["Figure"] = create_summary_figure(original_data, input_data, target_data, output_data, min(MAX_NUM_SHOW, input_data.size(0)))
+    report["Figure"] = create_summary_figure(
+        original_data,
+        input_data,
+        target_data,
+        output_data,
+        min(MAX_NUM_SHOW, input_data.size(0)),
+    )
 
     return report
 
